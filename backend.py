@@ -1,7 +1,7 @@
 from google.cloud import aiplatform
 from vertexai.preview.generative_models import GenerativeModel, Part
 
-# Configuration 
+# VERTEX AI Configuration 
 
 PROJECT_ID = "neat-shell-483606-d3"
 LOCATION = "us-central1"
@@ -70,8 +70,31 @@ def process_image(image_bytes: bytes) -> dict:
 
     return _parse_response(response.text)
 
+# pdf processing
+
+def process_pdf(pdf_bytes: bytes) -> dict:
+    pdf_part = Part.from_data(
+        data=pdf_bytes,
+        mime_type="application/pdf"
+    )
+
+    response = model.generate_content(
+        [
+            BASE_PROMPT + "\n\nPDF INPUT: The attached document contains study material.",
+            pdf_part
+        ],
+        generation_config={
+            "response_mime_type": "application/json"
+        }
+    )
+
+    return _parse_response(response.text)
+
+
+
 
 # Response parsing
+# Converts Gemini's JSON string into a Python dictionary
 
 def _parse_response(text: str) -> dict:
     """
